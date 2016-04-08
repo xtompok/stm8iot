@@ -3,6 +3,7 @@
 *.ko
 *.obj
 *.elf
+*.rel
 
 # Precompiled Headers
 *.gch
@@ -26,7 +27,18 @@
 *.app
 *.i*86
 *.x86_64
-*.hex
+*.ihx
 
 # Debug files
 *.dSYM/
+
+# Compiler files
+*.asm
+*.sym
+*.lk
+*.map
+*.lst
+*.rst
+
+# Vim swap files
+*.swp

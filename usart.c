@@ -59,3 +59,9 @@ void USARTPrintf(char *message)
 		ch++;							   //  Grab the next character.
 	}
 }
+
+void USARTPutc(char c){
+	USART1_DR = c;	 //  Put the next character into the data transmission register.
+	while (!(USART1_SR & USART_SR_TXE));		  //  Wait for transmission to complete.
+
+}

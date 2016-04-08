@@ -180,14 +180,14 @@
 #define TIM_SR1_UIF (1 << 0)
 
 /*------------- SPI ------------*/
-#define SPI_CR1 *(unsigned char *)0x52
-#define SPI_CR2 *(unsigned char *)0x52
-#define SPI_ICR *(unsigned char *)0x52
-#define SPI_SR *(unsigned char *)0x52
-#define SPI_DR *(unsigned char *)0x52
-#define SPI_CRCPR *(unsigned char *)0x52
-#define SPI_RXCRCR *(unsigned char *)0x52
-#define SPI_TXCRCR *(unsigned char *)0x52
+#define SPI_CR1 *(unsigned char *)0x5200
+#define SPI_CR2 *(unsigned char *)0x5201
+#define SPI_ICR *(unsigned char *)0x5202
+#define SPI_SR *(unsigned char *)0x5203
+#define SPI_DR *(unsigned char *)0x5204
+#define SPI_CRCPR *(unsigned char *)0x5205
+#define SPI_RXCRCR *(unsigned char *)0x5206
+#define SPI_TXCRCR *(unsigned char *)0x5207
 
 /* SPI_CR1 bits */
 #define SPI_CR1_LSBFIRST (1<<7)

@@ -1,5 +1,7 @@
 #include "stm8s.h"
 #include "usart.h"
+#include "nrf.h"
+#include "spi.h"
 //
 //  Setup the system clock to run at 16MHz using the internal oscillator.
 //
@@ -27,18 +29,43 @@ void InitialiseSystemClock()
 int main(void)
 {
 	int d;
+	unsigned char data[8];
 	
+	data[0]=0xAA;	
+	data[1]=0xF0;	
+	data[2]=0x0F;	
+
 	__disable_interrupt();
 	InitialiseSystemClock();
 	InitialiseUSART();
+	spi_init();
+	nrf_init();
 	__enable_interrupt();
+
 	// Configure pins
 	PB_DDR = (1<<5);
 	PB_CR1 = (1<<5);
 	// Loop
 	do {
 		PB_ODR ^= (1<<5);
+		nrf_listen();
 		for(d = 0; d < 29000; d++) { }
+		nrf_nolisten();
 		USARTPrintf("Hello from my microcontroller....\n\r");
+//#define TX
+#ifdef TX
+		nrf_transmit(data,3);
+#else
+		if (!nrf_receive(data,3)){
+			USARTPrintf("Nothing\n");
+		}else{
+			USARTPrintf("Data:");	
+			USARTPutc(data[0]);
+			USARTPutc(data[1]);
+			USARTPutc(data[2]);
+			USARTPrintf("\n");	
+		}
+#endif
+		
 	} while(1);
 }

@@ -6,7 +6,7 @@ LDFLAGS=-lstm8 --out-fmt-ihx
 
 STM8FLASH=~/Programy/stm8flash/stm8flash
 
-SOURCES=firmware.c usart.c 
+SOURCES=firmware.c usart.c spi.c nrf.c delay.c
 OBJECTS=$(SOURCES:.c=.rel)
 OBJECT=firmware
 

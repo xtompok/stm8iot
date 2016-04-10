@@ -65,3 +65,14 @@ void USARTPutc(char c){
 	while (!(USART1_SR & USART_SR_TXE));		  //  Wait for transmission to complete.
 
 }
+
+void USARTPutByte(char c){
+	char i;
+	for (i =0; i<8;i++){
+		if (c & (1<<(7-i)))
+			USARTPutc('1');
+		else
+			USARTPutc('0');
+	}
+	USARTPutc(' ');
+}

@@ -3,8 +3,8 @@
 
 void spi_init(){
 	SPI_CR1 = 0;
-	// Frequency 16MHz / 256
-	SPI_CR1 |= SPI_CR1_BR2 | SPI_CR1_BR1 | SPI_CR1_BR0;
+	// Frequency 16MHz / 32 = 0.5MHz
+	SPI_CR1 |= SPI_CR1_BR2;
 	// Idle -> CLK low
 	// reading on raise edge
 	// MSB first

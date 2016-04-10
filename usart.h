@@ -6,6 +6,7 @@
 void InitialiseUSART();
 void USARTPrintf(char *message);
 void USARTPutc(char c);
+void USARTPutByte(char c);
 
 
 #endif

@@ -20,11 +20,13 @@
 
 static inline void _delay_cycl( unsigned short __ticks )
 {
+  volatile unsigned short t;
+  t = __ticks;
   #define T_COUNT(x) ((( F_CPU_MHZ * x )-5)/5)
 	__asm__("nop\n nop\n"); 
 	do { 		// ASM: ldw X, #tick; lab$: decw X; tnzw X; jrne lab$
-                __ticks--;//      2c;                 1c;     2c    ; 1/2c   
-        } while ( __ticks );
+                t--;//      2c;                 1c;     2c    ; 1/2c   
+        } while ( t );
 	__asm__("nop\n");
 }
 

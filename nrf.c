@@ -46,16 +46,16 @@ unsigned int nrf_reg_read(unsigned char reg, unsigned char size) {
 }
 
 void nrf_reg_write(unsigned char reg, unsigned int data, unsigned char size) {
-	USARTPrintf("Before: ");
-	USARTPutByte(nrf_reg_read(reg,1));
+	//USARTPrintf("Before: ");
+	//USARTPutByte(nrf_reg_read(reg,1));
 	nrf_csl();
 	_nrf_status = spi_xfer_byte(NRF_CMD_W_REGISTER | (reg & 0x1f));
 	spi_xfer_byte(data & 0xff);
 	if (size > 1) spi_xfer_byte( (data >> 8) & 0xff );
 	nrf_csh();
-	USARTPrintf("After: ");
-	USARTPutByte(nrf_reg_read(reg,1));
-	USARTPutc('\n');
+	//USARTPrintf("After: ");
+	//USARTPutByte(nrf_reg_read(reg,1));
+	//USARTPutc('\n');
 }
 
 void nrf_transmit(unsigned char *data, unsigned char len) {
@@ -65,33 +65,33 @@ void nrf_transmit(unsigned char *data, unsigned char len) {
 	nrf_csl();
 	_nrf_status = spi_xfer_byte(NRF_CMD_FLUSH_TX);
 	nrf_csh();
-	USARTPutByte(_nrf_status);
+//	USARTPutByte(_nrf_status);
 
 	/* Send new data. */
 	nrf_csl();
 	_nrf_status = spi_xfer_byte(NRF_CMD_W_TX_PAYLOAD);
-	USARTPutByte(_nrf_status);
+//	USARTPutByte(_nrf_status);
 	for (i = 0; i < len; i++) spi_xfer_byte(data[i]);
 	nrf_csh();
 
 	/* Transmit. Interrupts are disabled, since if we keep NRF in tx mode for
 	 * more than 4ms, it will self destruct. */
 	__disable_interrupt();
-	USARTPutByte(nrf_reg_read(0x07,1));
-	USARTPutByte(nrf_reg_read(0x00,1));
+//	USARTPutByte(nrf_reg_read(0x07,1));
+//	USARTPutByte(nrf_reg_read(0x00,1));
 	nrf_ceh();
 	delay_us(20); /* At least 10us required. */
 	nrf_cel();
 	__enable_interrupt();
-	USARTPutc('\n');
+//	USARTPutc('\n');
 }
 
 void nrf_listen() {
-	nrf_ceh();
+	nrf_cel();
 }
 
 void nrf_nolisten() {
-	nrf_cel();
+	nrf_ceh();
 }
 
 int nrf_receive(unsigned char *data, unsigned char len) {

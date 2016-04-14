@@ -127,8 +127,11 @@ int main(void)
 		nrf_reg_write(NRF_REG_STATUS,TX_DS,1);
 #else
 		nrf_listen();
-		delay_ms(500);
+		delay_ms(10);
 		nrf_nolisten();
+		data[0]=0xba;
+		data[1]=0xdc;
+		data[2]=0xaf;
 		if (!nrf_receive(data,3)){
 			USARTPrintf("Nothing\n");
 		}else{

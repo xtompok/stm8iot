@@ -1,5 +1,6 @@
 #include "spi.h"
 #include "usart.h"
+#include "delay.h"
 
 void spi_init(){
 	SPI_CR1 = 0;
@@ -23,9 +24,10 @@ void spi_speed(unsigned int speed){
 }
 
 unsigned char spi_xfer_byte(unsigned char data){
+	while(!(SPI_SR & SPI_SR_TXE));
 	SPI_DR = data;
 	// Wait until Tx buffer is empty and Rx not empty
-	while (!(SPI_SR & SPI_SR_TXE) || !(SPI_SR & SPI_SR_RXNE));
+	while (!(SPI_SR & SPI_SR_RXNE));
 	return SPI_DR;
 }
 

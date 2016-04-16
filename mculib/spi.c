@@ -16,12 +16,6 @@ void spi_init(){
 	SPI_CR1 |= SPI_CR1_SPE | SPI_CR1_MSTR;
 
 }
-void spi_mode(unsigned char mode){
-
-}
-void spi_speed(unsigned int speed){
-
-}
 
 unsigned char spi_xfer_byte(unsigned char data){
 	while(!(SPI_SR & SPI_SR_TXE));

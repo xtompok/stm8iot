@@ -1,9 +1,11 @@
-#include "stm8s.h"
-#include "usart.h"
-#include "nrf.h"
-#include "spi.h"
-#include "delay.h"
-#include "hardware.h"
+#define MCU
+
+#include "mculib/stm8s.h"
+#include "lib/print.h"
+#include "mculib/nrf.h"
+#include "mculib/spi.h"
+#include "mculib/delay.h"
+#include "mculib/hardware.h"
 //
 //  Setup the system clock to run at 16MHz using the internal oscillator.
 //
@@ -47,57 +49,23 @@ int main(void)
 	InitialiseSystemClock();
 	InitialiseUSART();
 	spi_init();
+	nrf_init();
+	nrf_powerdown();
+	nrf_powerup();
+	// Setup the radio: default addresses, 0dBm tx power, 1Mbit
+	nrf_reg_write(NRF_REG_CONFIG, EN_CRC | PWR_UP | PRIM_RX | CRCO, 1);
+	nrf_reg_write(NRF_REG_RF_CH, 1, 1);
+	nrf_reg_write(NRF_REG_RX_PW_P0, 3, 1);
+	//nrf_reg_write(NRF_REG_RF_SETUP, RF_SETUP, 1);
+	// Make everything async
+	nrf_reg_write(NRF_REG_EN_AA, 0, 1);
 	__enable_interrupt();
+
+//	puts("Sent: 0xAA");
+//	putchex(spi_xfer_byte(0xAA));
+	delay_ms(1000);
 	
-	delay_ms(100);
-
-	delay_ms(20); /* 10.3ms should be enough */
-	NRF_PDIR |= NRF_CS | NRF_CE;
-	NRF_PCR |= NRF_CS | NRF_CE;
-	nrf_csh();
-	nrf_cel();
-        delay_ms(20); /* 10.3ms should be enough */
-	
-
-        config = nrf_reg_read(NRF_REG_CONFIG, 1);
-	USARTPutByte(config);
-	config |= PWR_UP;
-	USARTPutByte(config);
-        nrf_reg_write(NRF_REG_CONFIG, config, 1);
-        config = nrf_reg_read(NRF_REG_CONFIG, 1);
-	USARTPutByte(config);
-        delay_ms(20); /* 10.3ms should be enough */
-
-//      nrf_reg_write(NRF_REG_CONFIG, config | PWR_UP | CRCO, 1);
-        delay_ms(2); /* 1.5ms should be enough */
-
-        nrf_reg_write(NRF_REG_EN_AA, 0, 1); /* Disable Auto Acknowledgment */
-        nrf_reg_write(NRF_REG_RF_CH, 1, 1);
-        nrf_reg_write(NRF_REG_RX_PW_P0, 3, 1);
-        nrf_reg_write(NRF_REG_RF_SETUP, RF_PWR1 | RF_DR | LNA_HCURR, 1);
-        nrf_reg_write(NRF_REG_CONFIG, EN_CRC | PWR_UP | PRIM_RX | CRCO, 1);
-        config = nrf_reg_read(NRF_REG_CONFIG, 1);
-	USARTPutByte(config);
-
-
-	USARTPutc('\n');
-	USARTPutByte(nrf_reg_read(0x07,1));
-	USARTPutByte(nrf_reg_read(0x00,1));
-	USARTPutc('\n');
-
-
-
-/*	USARTPutByte(nrf_reg_read(0x04,1));
-	USARTPutc('c');
-	nrf_reg_write(0x04,0xAA,1);
-	USARTPutByte(nrf_reg_read(0x04,1));
-	USARTPutc('c');
-	nrf_reg_write(0x04,0xEE,1);
-	USARTPutByte(nrf_reg_read(0x04,1));
-	USARTPutc('c');
-*/
-//	delay_ms(1000);
-//#define TX
+#define TX
 #ifdef TX
 	nrf_settx();
 #else
@@ -107,19 +75,22 @@ int main(void)
 	// Configure pins
 	PB_DDR = (1<<5);
 	PB_CR1 = (1<<5);
+//	PB_ODR ^= (1<<5);
 	// Loop
 	do {
 		PB_ODR ^= (1<<5);
 //		nrf_listen();
 //		for(d = 0; d < 29000; d++) { }
 //		nrf_nolisten();
-//		USARTPrintf("Hello from my microcontroller....\n\r");
+//		puts("Hello from my microcontroller....\n\r");
 
-		USARTPutc('s');
-		USARTPutByte(nrf_reg_read(NRF_REG_STATUS,1));
-		USARTPutc('c');
-		USARTPutByte(nrf_reg_read(NRF_REG_CONFIG,1));
-		USARTPutc('\n');
+		putc('s');
+		putcbin(nrf_reg_read(NRF_REG_STATUS,1));
+		putchex(nrf_reg_read(NRF_REG_STATUS,1));
+		putc('c');
+		putcbin(nrf_reg_read(NRF_REG_CONFIG,1));
+		putc('\n');
+
 #ifdef TX
 		delay_ms(10);
 		nrf_transmit(data,3);
@@ -133,13 +104,13 @@ int main(void)
 		data[1]=0xdc;
 		data[2]=0xaf;
 		if (!nrf_receive(data,3)){
-			USARTPrintf("Nothing\n");
+			puts("Nothing\n");
 		}else{
-			USARTPrintf("Data:");	
-			USARTPutc(data[0]);
-			USARTPutc(data[1]);
-			USARTPutc(data[2]);
-			USARTPrintf("\n");	
+			puts("Data:");	
+			putc(data[0]);
+			putc(data[1]);
+			putc(data[2]);
+			puts("\n");	
 		}
 //		nrf_setrx();
 #endif

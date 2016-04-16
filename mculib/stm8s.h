@@ -221,8 +221,17 @@
 #define SPI_SR_TXE (1<<1)
 #define SPI_SR_RXNE (1<<0)
 
+
+#define INT_TIM1_OVF	__interrupt(11)
+#define INT_TIM1_CMP	__interrupt(12)
+#define INT_TIM2_OVF	__interrupt(13)
+#define INT_TIM2_CMP	__interrupt(14)
+#define INT_USART1_TX	__interrupt(17)
+#define INT_USART1_RX	__interrupt(18)
+
 #define __enable_interrupt()    {__asm__("rim\n");}  /* enable interrupts */
 #define __disable_interrupt()   {__asm__("sim\n");}  /* disable interrupts */
 #define rim()                 {__asm__("rim\n");}  /* enable interrupts */
 #define sim()                 {__asm__("sim\n");}  /* disable interrups */
+
 

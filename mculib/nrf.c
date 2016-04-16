@@ -11,7 +11,7 @@
 #include "hardware.h"
 #include "delay.h"
 #include "nrf.h"
-#include "usart.h"
+#include "../lib/print.h"
 
 /* NRF command words */
 #define NRF_CMD_R_REGISTER 0x00
@@ -32,6 +32,7 @@ void nrf_ceh() { NRF_POUT |= NRF_CE; }
 void nrf_cel() { NRF_POUT &= ~NRF_CE; }
 
 unsigned int nrf_reg_read(unsigned char reg, unsigned char size) {
+	unsigned char ch;
 	unsigned int out;
 	nrf_csl();
 	/* Send command byte, status register is always returned. */
@@ -58,6 +59,7 @@ void nrf_transmit(unsigned char *data, unsigned char len) {
 	nrf_csl();
 	_nrf_status = spi_xfer_byte(NRF_CMD_FLUSH_TX);
 	nrf_csh();
+	putchex(_nrf_status);
 
 	/* Send new data. */
 	nrf_csl();
@@ -140,6 +142,7 @@ void nrf_powerdown() {
 	nrf_csl();
 	nrf_cel();
 	NRF_PDIR &= ~NRF_CE;
+	NRF_PCR &= ~NRF_CE;
 }
 
 void _nrf_setrx(unsigned char prx) {

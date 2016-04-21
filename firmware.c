@@ -6,6 +6,10 @@
 #include "mculib/spi.h"
 #include "mculib/delay.h"
 #include "mculib/hardware.h"
+#include "magique.h"
+#include "lib/network.h"
+
+struct node my_info;
 //
 //  Setup the system clock to run at 16MHz using the internal oscillator.
 //
@@ -38,7 +42,8 @@ static void nrf_cel() { NRF_POUT &= ~NRF_CE; }
 int main(void)
 {
 	int d;
-	unsigned char data[8];
+	unsigned char i;	
+	unsigned char data[32];
 	unsigned char config;
 	
 	data[0]=0xAA;	
@@ -54,8 +59,8 @@ int main(void)
 	nrf_powerup();
 	// Setup the radio: default addresses, 0dBm tx power, 1Mbit
 	nrf_reg_write(NRF_REG_CONFIG, EN_CRC | PWR_UP | PRIM_RX | CRCO, 1);
-	nrf_reg_write(NRF_REG_RF_CH, 1, 1);
-	nrf_reg_write(NRF_REG_RX_PW_P0, 3, 1);
+	nrf_reg_write(NRF_REG_RF_CH, 110, 1);
+	nrf_reg_write(NRF_REG_RX_PW_P0, 32, 1);
 	//nrf_reg_write(NRF_REG_RF_SETUP, RF_SETUP, 1);
 	// Make everything async
 	nrf_reg_write(NRF_REG_EN_AA, 0, 1);
@@ -65,7 +70,7 @@ int main(void)
 //	putchex(spi_xfer_byte(0xAA));
 	delay_ms(1000);
 	
-#define TX
+//#define TX
 #ifdef TX
 	nrf_settx();
 #else
@@ -84,13 +89,13 @@ int main(void)
 //		nrf_nolisten();
 //		puts("Hello from my microcontroller....\n\r");
 
-		putc('s');
+/*		putc('s');
 		putcbin(nrf_reg_read(NRF_REG_STATUS,1));
 		putchex(nrf_reg_read(NRF_REG_STATUS,1));
 		putc('c');
 		putcbin(nrf_reg_read(NRF_REG_CONFIG,1));
 		putc('\n');
-
+*/
 #ifdef TX
 		delay_ms(10);
 		nrf_transmit(data,3);
@@ -103,13 +108,15 @@ int main(void)
 		data[0]=0xba;
 		data[1]=0xdc;
 		data[2]=0xaf;
-		if (!nrf_receive(data,3)){
-			puts("Nothing\n");
+		if (!nrf_receive(data,32)){
+//			puts("Nothing\n");
 		}else{
+			nrf_listen();
 			puts("Data:");	
-			putc(data[0]);
-			putc(data[1]);
-			putc(data[2]);
+			for (i=0;i<32;i++){
+				putchex(data[i]);	
+				putc(' ');
+			}
 			puts("\n");	
 		}
 //		nrf_setrx();

@@ -8,6 +8,7 @@
 #include "mculib/hardware.h"
 #include "magique.h"
 #include "lib/network.h"
+#include "modes/cities.h"
 
 struct node my_info;
 //
@@ -46,35 +47,31 @@ int main(void)
 	unsigned char data[32];
 	unsigned char config;
 	
-	data[0]=0xAA;	
-	data[1]=0xF0;	
-	data[2]=0x0F;	
-
 	__disable_interrupt();
 	InitialiseSystemClock();
 	InitialiseUSART();
 	spi_init();
 	nrf_init();
-	nrf_powerdown();
-	nrf_powerup();
-	// Setup the radio: default addresses, 0dBm tx power, 1Mbit
-	nrf_reg_write(NRF_REG_CONFIG, EN_CRC | PWR_UP | PRIM_RX | CRCO, 1);
-	nrf_reg_write(NRF_REG_RF_CH, 110, 1);
-	nrf_reg_write(NRF_REG_RX_PW_P0, 32, 1);
-	//nrf_reg_write(NRF_REG_RF_SETUP, RF_SETUP, 1);
-	// Make everything async
-	nrf_reg_write(NRF_REG_EN_AA, 0, 1);
+	network_init(RF_ROLE_TX);
 	__enable_interrupt();
 
-//	puts("Sent: 0xAA");
-//	putchex(spi_xfer_byte(0xAA));
 	delay_ms(1000);
 	
-//#define TX
-#ifdef TX
-	nrf_settx();
-#else
+#ifdef DUMP
 	nrf_setrx();
+#endif
+#ifdef CITY
+	my_info.type = TYPE_CITY;
+	my_info.team = NO_TEAM;
+	my_info.id = MY_ID;
+	my_info.units = CITY_UNITS;
+	my_info.mode = MODE_DEFENSE;
+#endif
+
+#ifdef SOURCE
+	my_info.type = TYPE_SOURCE;
+	my_info.team = NO_TEAM;
+	my_info.id = MY_ID;	
 #endif
 
 	// Configure pins
@@ -84,33 +81,12 @@ int main(void)
 	// Loop
 	do {
 		PB_ODR ^= (1<<5);
-//		nrf_listen();
-//		for(d = 0; d < 29000; d++) { }
-//		nrf_nolisten();
-//		puts("Hello from my microcontroller....\n\r");
 
-/*		putc('s');
-		putcbin(nrf_reg_read(NRF_REG_STATUS,1));
-		putchex(nrf_reg_read(NRF_REG_STATUS,1));
-		putc('c');
-		putcbin(nrf_reg_read(NRF_REG_CONFIG,1));
-		putc('\n');
-*/
-#ifdef TX
-		delay_ms(10);
-		nrf_transmit(data,3);
-		while (!(nrf_reg_read(NRF_REG_STATUS,1)&TX_DS));
-		nrf_reg_write(NRF_REG_STATUS,TX_DS,1);
-#else
+#ifdef DUMP
 		nrf_listen();
 		delay_ms(10);
 		nrf_nolisten();
-		data[0]=0xba;
-		data[1]=0xdc;
-		data[2]=0xaf;
-		if (!nrf_receive(data,32)){
-//			puts("Nothing\n");
-		}else{
+		if (nrf_receive(data,32)){
 			nrf_listen();
 			puts("Data:");	
 			for (i=0;i<32;i++){
@@ -119,8 +95,27 @@ int main(void)
 			}
 			puts("\n");	
 		}
-//		nrf_setrx();
 #endif
+#ifdef SOURCE
+		pk_out.node_from = my_info.id;
+		pk_out.type = my_info.type;
+		pk_out.team = my_info.team;
+		pk_out.units = SOURCE_UNITS;
+		pk_out.action = ACTION_SOURCE;
+		pk_out.node_to = 0;
+		network_send(&pk_out,0);
+		delay_ms(1000);
+	
+#endif
+#ifdef CITY
+
+
+
+#endif
+
+
+			
+
 		
 	} while(1);
 }

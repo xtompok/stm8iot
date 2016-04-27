@@ -59,7 +59,6 @@ void nrf_transmit(unsigned char *data, unsigned char len) {
 	nrf_csl();
 	_nrf_status = spi_xfer_byte(NRF_CMD_FLUSH_TX);
 	nrf_csh();
-	putchex(_nrf_status);
 
 	/* Send new data. */
 	nrf_csl();
